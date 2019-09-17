@@ -97,10 +97,6 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
             TEMP_INPUT_FOLDER+"Figure Queue/"+file,
             labMeetingFolderName+"Figures/"
         )
-        # remove("Figure Queue/"+file)
-    """
-    Need to just push an empty 'Figure Queue/' to Google Drive (effectively deleting the figures that have been used)
-    """
 
     # Remove template slides
     rIdToDrop = ['rId1','rId2', 'rId3', 'rId4']
