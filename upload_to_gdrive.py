@@ -53,7 +53,7 @@ else:
     if os.path.exists("mycreds.txt"):
         gauth.LoadCredentialsFile("mycreds.txt")
 
-    gauth = authenticate()
+    gauth = authenticate(gauth)
 
     # Save the current credentials to a file
     gauth.SaveCredentialsFile("mycreds.txt")
