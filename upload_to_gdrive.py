@@ -1,3 +1,4 @@
+from slack_functions import *
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from os import remove, mkdir, listdir
@@ -7,16 +8,38 @@ import sys
 ### Import relevant values from temp_output.txt
 ###############################################################################
 
-assert os.path.exists('temp_output.txt'), "'temp_output.txt' does not exist. Need to run 'build_weekly_ppt.py' before 'upload_to_gdrive.py'."
+assert os.path.exists('temp_output.txt'), "'temp_output.txt' does not exist. Need to run 'build_weekly_ppt.py' before " \
+                                          "'upload_to_gdrive.py'. "
 
-tempDict = {}
-with open('temp_output.txt', 'r') as f:
-    for line in f:
-        splitLine = line.split()
-        if len(splitLine)==2:
-            tempDict[splitLine[0]] = int(splitLine[1])
-        else:
-            tempDict[splitLine[0]] = " ".join(splitLine[1:])
+
+
+def etl_build_details():
+    tempDict = {}
+    with open('temp_output.txt', 'r') as f:
+        for line in f:
+            split_line = line.split()
+            if len(split_line) == 2:
+                tempDict[split_line[0]] = int(split_line[1])
+            else:
+                tempDict[split_line[0]] = " ".join(split_line[1:])
+    return tempDict
+
+
+tempDict = etl_build_details()
+
+
+def authenticate(gauth):
+    if gauth.credentials is None:
+        # Authenticate if they're not there
+        gauth.LocalWebserverAuth()
+    elif gauth.access_token_expired:
+        # Refresh them if expired
+        gauth.Refresh()
+    else:
+        # Initialize the saved creds
+        gauth.Authorize()
+    return gauth
+
 
 if tempDict['agendaItemsCount']==0 and tempDict['figureCount']==0:
     print("No Agenda or Figures this week... :(")
@@ -27,17 +50,10 @@ else:
     gauth = GoogleAuth()
 
     # Try to load saved client credentials
-    if os.path.exists("mycreds.txt"):gauth.LoadCredentialsFile("mycreds.txt")
+    if os.path.exists("mycreds.txt"):
+        gauth.LoadCredentialsFile("mycreds.txt")
 
-    if gauth.credentials is None:
-        # Authenticate if they're not there
-        gauth.LocalWebserverAuth()
-    elif gauth.access_token_expired:
-        # Refresh them if expired
-        gauth.Refresh()
-    else:
-        # Initialize the saved creds
-        gauth.Authorize()
+    gauth = authenticate()
 
     # Save the current credentials to a file
     gauth.SaveCredentialsFile("mycreds.txt")
@@ -131,3 +147,4 @@ else:
                 + "Figures/"
                 + item)
             figure.Upload()
+            distribute_link_to_lab()
