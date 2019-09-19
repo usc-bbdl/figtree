@@ -10,8 +10,8 @@ import sys
 
 assert os.path.exists('temp_output.txt'), "'temp_output.txt' does not exist. Need to run 'build_weekly_ppt.py' before " \
                                           "'upload_to_gdrive.py'. "
-
-
+distribute_link_to_lab()
+remind_lab_to_upload()
 
 def etl_build_details():
     tempDict = {}
