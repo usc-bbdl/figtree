@@ -1,9 +1,10 @@
-from slack_functions import *
+import os.path
+from os import listdir
+
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-from os import remove, mkdir, listdir
-import os.path
-import sys
+
+from slack_functions import *
 
 ### Import relevant values from temp_output.txt
 ###############################################################################
@@ -12,6 +13,7 @@ assert os.path.exists('temp_output.txt'), "'temp_output.txt' does not exist. Nee
                                           "'upload_to_gdrive.py'. "
 distribute_link_to_lab()
 remind_lab_to_upload()
+
 
 def etl_build_details():
     tempDict = {}
@@ -41,7 +43,7 @@ def authenticate(gauth):
     return gauth
 
 
-if tempDict['agendaItemsCount']==0 and tempDict['figureCount']==0:
+if tempDict['agendaItemsCount'] == 0 and tempDict['figureCount'] == 0:
     print("No Agenda or Figures this week... :(")
 else:
     ### Connect to Google Drive API
@@ -62,11 +64,12 @@ else:
     ### Find 'ValeroLabMeetings' folder id
     ###########################################################################
     assert len(
-                drive.ListFile({'q': "title='ValeroLabMeetings' and 'root' in parents and trashed=false"}).GetList()
-            )==1,\
+        drive.ListFile({'q': "title='ValeroLabMeetings' and 'root' in parents and trashed=false"}).GetList()
+    ) == 1, \
         "Error. 'ValeroLabMeetings/' not found in Google Drive."
 
-    ValeroLabMeetings_folder_id = drive.ListFile({'q': "title='ValeroLabMeetings' and 'root' in parents and trashed=false"}).GetList()[0]['id']
+    ValeroLabMeetings_folder_id = \
+    drive.ListFile({'q': "title='ValeroLabMeetings' and 'root' in parents and trashed=false"}).GetList()[0]['id']
 
     ### Create Folder for Latest Lab Meeting
     ###########################################################################
@@ -95,8 +98,8 @@ else:
     ###########################################################################
 
     labMeetingPresentation_title = (
-        tempDict['labMeetingFolderName'][:-1].replace(" ","_")
-        + ".pptx"
+            tempDict['labMeetingFolderName'][:-1].replace(" ", "_")
+            + ".pptx"
     )
     labMeetingPresentation = drive.CreateFile(
         {
@@ -115,7 +118,7 @@ else:
     ### Upload figures
     ###########################################################################
 
-    if tempDict['figureCount']!=0:
+    if tempDict['figureCount'] != 0:
         figuresFolder_metadata = {
             'title': 'Figures',
             # Define the file type as folder
@@ -133,7 +136,7 @@ else:
             {'q': "title='Figures' and '{}' in parents and trashed=false".format(labMeetingFolder_id)}
         ).GetList()[0]['id']
 
-        for item in listdir(tempDict['labMeetingFolderName']+'Figures/'):
+        for item in listdir(tempDict['labMeetingFolderName'] + 'Figures/'):
             figure = drive.CreateFile(
                 {
                     "parents": [{
