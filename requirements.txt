@@ -1,4 +1,3 @@
 PyDrive
-google-api-python-client
 python-pptx
 python-docx
