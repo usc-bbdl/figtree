@@ -7,6 +7,7 @@ from os import mkdir,listdir
 from shutil import copy2
 
 ### Assumes files will be downloaded to a folder name TEMP_INPUT_FOLDER
+TEMP_INPUT_FOLDER = 'TEMP_INPUT_FOLDER/'
 def build_weekly_ppt(TEMP_INPUT_FOLDER):
     """
     Takes in the name of the folder that contains the 'Figure Queue' as well as the 'Meeting Agenda' (TEMP_INPUT_FOLDER), builds a powerpoint presentation for that week's lab meeting, and moves the presentation and corresponding figures to a new folder that will be uploaded to Google Drive (TEMP_OUTPUT_FOLDER)
@@ -58,6 +59,14 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
 
     # Add Agenda slide
     agenda_docx = Document(TEMP_INPUT_FOLDER+"Meeting Agenda.docx")
+    if (
+            len(agenda_docx.paragraphs)==1
+            and agenda_docx.paragraphs[0].text==''
+            ):
+        agendaItemsCount=0
+    else:
+        agendaItemsCount=len(agenda_docx.paragraphs)
+
     agenda_slide = prs.slides.add_slide(agenda_slide_layout)
     agenda_slide_title = agenda_slide.placeholders[10]
     agenda_slide_subtitle = agenda_slide.placeholders[11]
@@ -68,12 +77,13 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
     agenda_slide_subtitle.text = thisWeeksAgenda
 
     # Add all appropriate files as Content slides
+    figureCount = 0
     for file in fileNames:
         content_slide = prs.slides.add_slide(content_slide_layout)
         content_slide_title = content_slide.placeholders[10]
         if "_" not in str(file):
             titleStr = str(file)
-            presenterName = "(Unknown)"
+            presenterName = "Unknown"
         else:
             titleStr = file.replace("_"," ")[:file.find(".")]
             presenterName = titleStr[(titleStr.rfind(" ")+1):]
@@ -97,6 +107,7 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
             TEMP_INPUT_FOLDER+"Figure Queue/"+file,
             labMeetingFolderName+"Figures/"
         )
+        figureCount+=1
 
     # Remove template slides
     rIdToDrop = ['rId1','rId2', 'rId3', 'rId4']
@@ -106,3 +117,15 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
            del prs.slides._sldIdLst[i]
 
     prs.save(labMeetingFolderName+labMeetingPresentationName)
+    return(agendaItemsCount,figureCount,labMeetingFolderName)
+
+assert os.path.exists(TEMP_INPUT_FOLDER), "Need to create TEMP_INPUT_FOLDER."
+
+agendaItemsCount,figureCount,labMeetingFolderName = build_weekly_ppt(
+    TEMP_INPUT_FOLDER
+)
+
+print("agendaItemsCount\t" + str(agendaItemsCount) + "\n"
+    + "figureCount\t" + str(figureCount) + "\n"
+    + "labMeetingFolderName\t" + labMeetingFolderName
+)
