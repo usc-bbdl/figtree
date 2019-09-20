@@ -1,5 +1,7 @@
 # Confidential Information
 credentials.json
+temp_output.txt
+TEMP_INPUT_FOLDER/
 mycreds.txt
 .DS_Store
 # Byte-compiled / optimized / DLL files
