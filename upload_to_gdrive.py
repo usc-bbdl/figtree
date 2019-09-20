@@ -118,7 +118,16 @@ else:
     ### Upload figures
     ###########################################################################
 
-    if tempDict['figureCount'] != 0:
+    FigureQueue_folder_id = drive.ListFile(
+        {'q': "title='Figure Queue' and '{}' in parents and trashed=false".format(ValeroLabMeetings_folder_id)}
+    ).GetList()[0]['id']
+
+    FigureQueue_item_list = drive.ListFile(
+        {'q': "title!='README.md' and '{}' in parents and trashed=false".format(FigureQueue_folder_id)}).GetList()
+
+    if len(FigureQueue_item_list) != 0:
+        ### Create new figures subfolder
+        #######################################################################
         figuresFolder_metadata = {
             'title': 'Figures',
             # Define the file type as folder
@@ -136,18 +145,16 @@ else:
             {'q': "title='Figures' and '{}' in parents and trashed=false".format(labMeetingFolder_id)}
         ).GetList()[0]['id']
 
-        for item in listdir(tempDict['labMeetingFolderName'] + 'Figures/'):
-            figure = drive.CreateFile(
-                {
-                    "parents": [{
-                        "kind": "drive#fileLink",
-                        "id": figuresFolder_id
-                    }]
-                }
-            )
-            figure.SetContentFile(
-                tempDict['labMeetingFolderName']
-                + "Figures/"
-                + item)
-            figure.Upload()
-            distribute_link_to_lab()
+        ### Move files from Figure Queue to new subfolder
+        #######################################################################
+        for item in sorted(FigureQueue_item_list, key=lambda x: x['title']):
+            drive.auth.service.files().update(
+                fileId=item['id'],
+                addParents=figuresFolder_id,
+                removeParents=FigureQueue_folder_id,
+                fields='id, parents'
+            ).execute()
+
+        ### Distribute link to lab
+        #######################################################################
+        distribute_link_to_lab()

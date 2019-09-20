@@ -4,24 +4,28 @@ from os import mkdir
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
+def authenticate(gauth):
+    if gauth.credentials is None:
+        # Authenticate if they're not there
+        gauth.LocalWebserverAuth()
+    elif gauth.access_token_expired:
+        # Refresh them if expired
+        gauth.Refresh()
+    else:
+        # Initialize the saved creds
+        gauth.Authorize()
+    return gauth
+
 ### Connect to Google Drive API
 ###############################################################################
 
 gauth = GoogleAuth()
 
 # Try to load saved client credentials
-if os.path.exists("mycreds.txt"): gauth.LoadCredentialsFile("mycreds.txt")
-# gauth.LoadCredentialsFile("credentials.json")
+if os.path.exists("mycreds.txt"):
+    gauth.LoadCredentialsFile("mycreds.txt")
 
-if gauth.credentials is None:
-    # Authenticate if they're not there
-    gauth.LocalWebserverAuth()
-elif gauth.access_token_expired:
-    # Refresh them if expired
-    gauth.Refresh()
-else:
-    # Initialize the saved creds
-    gauth.Authorize()
+gauth = authenticate(gauth)
 
 # Save the current credentials to a file
 gauth.SaveCredentialsFile("mycreds.txt")
@@ -88,9 +92,4 @@ if len(FigureQueue_item_list) != 0:
             + 'Figure Queue/'
             + item['title']
         )
-
-        # Delete the GD instance of each figure once they have been saved
-        item.Trash()  # Move file to trash.
-        # item.UnTrash()  # Move file out of trash.
-        # item.Delete()  # Permanently delete the file.
         i += 1
