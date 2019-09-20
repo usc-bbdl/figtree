@@ -112,6 +112,12 @@ else:
     )
     labMeetingPresentation.Upload()
 
+    ### Distribute link to lab
+    #######################################################################
+    
+    download_link = labMeetingPresentation.metadata['webContentLink']
+    distribute_link_to_lab(download_link)
+
     ### Upload figures
     ###########################################################################
 
@@ -152,6 +158,4 @@ else:
                 fields='id, parents'
             ).execute()
 
-        ### Distribute link to lab
-        #######################################################################
-        distribute_link_to_lab()
+

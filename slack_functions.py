@@ -14,14 +14,13 @@ headers = {
 def slack_confirmed_receipt(response):
     return (response.status_code == 200)
 
-
 def remind_lab_to_upload():
     data = '{"text":"Please upload your weekly update figure here: \n %s"}' % (DRIVE_QUEUE)
     response = requests.post(SLACK_API, headers=headers, data=data)
     print("WebHook Successful: " + str(slack_confirmed_receipt(response)))
 
-def distribute_link_to_lab():
-    data = '{"text":"Lab Meeting PPT for Week  %s: \n %s"}' % (week_number(), DRIVE_FOLDER)
+def distribute_link_to_lab(link_string):
+    data = '{"text":"Download ValeroLab Meeting PPT, Week %s: \n %s"}' % (week_number(), link_string)
     response = requests.post(SLACK_API, headers=headers, data=data)
     print("WebHook Successful: " + str(slack_confirmed_receipt(response)))
 
