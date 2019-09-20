@@ -91,6 +91,6 @@ if len(FigureQueue_item_list) != 0:
 
         # Delete the GD instance of each figure once they have been saved
         item.Trash()  # Move file to trash.
-        item.UnTrash()  # Move file out of trash.
-        item.Delete()  # Permanently delete the file.
+        # item.UnTrash()  # Move file out of trash.
+        # item.Delete()  # Permanently delete the file.
         i += 1
