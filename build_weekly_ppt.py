@@ -98,12 +98,12 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
             Inches(1.75)
         )
         ratio = figure.height / figure.width
-        if ratio > 4 / 5:
-            figure.height = Emu(Inches(4))
-            figure.width = Emu(Inches(4 / ratio))
+        if ratio > 5 / 13:
+            figure.height = Emu(Inches(5))
+            figure.width = Emu(Inches(5 / ratio))
         else:
-            figure.width = Emu(Inches(5))
-            figure.height = Emu(Inches(5 * ratio))
+            figure.width = Emu(Inches(13))
+            figure.height = Emu(Inches(13 * ratio))
         figure.left = Emu((Inches(13.3333) - figure.width) / 2)
         figure.top = Emu((Inches(7.5) - figure.height) / 2)
         copy2(
