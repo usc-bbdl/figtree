@@ -25,4 +25,4 @@ def distribute_link_to_lab(link_string):
     print("WebHook Successful: " + str(slack_confirmed_receipt(response)))
 
 def week_number():
-    return datetime.date(2010, 6, 16).isocalendar()[1]
+    return datetime.datetime.now().isocalendar()[1]
