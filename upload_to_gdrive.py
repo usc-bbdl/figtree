@@ -107,14 +107,13 @@ else:
         }
     )
     labMeetingPresentation.SetContentFile(
-        tempDict['labMeetingFolderName']
-        + labMeetingPresentation_title
+        labMeetingPresentation_title
     )
     labMeetingPresentation.Upload()
 
     ### Distribute link to lab
     #######################################################################
-    
+
     download_link = labMeetingPresentation.metadata['webContentLink']
     distribute_link_to_lab(download_link)
 
@@ -157,5 +156,3 @@ else:
                 removeParents=FigureQueue_folder_id,
                 fields='id, parents'
             ).execute()
-
-
