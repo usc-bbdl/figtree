@@ -1,4 +1,4 @@
 PyDrive
 python-pptx
 requests
-pandas
+xlrd

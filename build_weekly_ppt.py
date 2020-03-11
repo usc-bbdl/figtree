@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from os import mkdir, listdir
 from shutil import copy2
 
-import pandas as pd
+import xlrd
 from pptx import Presentation
 from pptx.util import Inches, Emu
 
@@ -61,11 +61,14 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
     title_slide_subtitle.text = labMeetingDateStr
 
     # Add Agenda slide
-    agenda_xlsx = pd.read_excel(
-        TEMP_INPUT_FOLDER+"Weekly Agenda.xlsx",
-        sheet_name="Formatted Agenda Items"
-    )
-    agendaItems=list(agenda_xlsx["Agenda Item(s)"])[0]
+    agenda_xlsx=xlrd.open_workbook(TEMP_INPUT_FOLDER+"Weekly Agenda.xlsx")
+    agenda_xlsx = agenda_xlsx.sheet_by_name("Formatted Agenda Items")
+    agendaItems = agenda_xlsx.row(1)[4].value
+    # agenda_xlsx = pd.read_excel(
+    #     TEMP_INPUT_FOLDER+"Weekly Agenda.xlsx",
+    #     sheet_name="Formatted Agenda Items"
+    # )
+    # agendaItems=list(agenda_xlsx["Agenda Item(s)"])[0]
     whitelist = {
         "and", "as", "at", "but", "by", "for", "from", "if", "in", "into",
         "like", "near", "nor",  "of", "off", "on", "once", "onto", "or",

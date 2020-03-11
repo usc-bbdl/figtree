@@ -5,7 +5,7 @@ from datetime import date
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
-# from slack_functions import *
+from slack_functions import *
 
 ### Import relevant values from temp_output.txt
 ###############################################################################
@@ -117,9 +117,9 @@ else:
     #######################################################################
 
     download_link = labMeetingPresentation.metadata['webContentLink']
-    # today = date.today()
-    # if today.weekday()==0: # Monday
-    #     distribute_link_to_lab(download_link)
+    today = date.today()
+    if today.weekday()==0: # Monday
+        distribute_link_to_lab(download_link)
 
     ### Upload figures
     ###########################################################################
