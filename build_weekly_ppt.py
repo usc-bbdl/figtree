@@ -139,7 +139,7 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
             prs.part.drop_rel(prs.slides._sldIdLst[i].rId)
             del prs.slides._sldIdLst[i]
 
-    prs.save(labMeetingFolderName + labMeetingPresentationName)
+    prs.save(labMeetingPresentationName)
     return (agendaItemsCount, figureCount, labMeetingFolderName)
 
 
