@@ -34,11 +34,10 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
     labMeetingDate = datetime.now() + timedelta(days=daysToLabMeeting)
     labMeetingDateStr = labMeetingDate.strftime("%A, %B %d, %Y")
     labMeetingFolderName = labMeetingDate.strftime("%Y_%m_%d Lab Meeting/")
-    mkdir(labMeetingFolderName)
-    mkdir(labMeetingFolderName + "Figures/")
+    # mkdir(labMeetingFolderName)
+    # mkdir(labMeetingFolderName + "Figures/")
     labMeetingPresentationName = labMeetingDate.strftime(
-        labMeetingFolderName
-        + "%Y_%m_%d_Lab_Meeting.pptx"
+        "%Y_%m_%d_Lab_Meeting.pptx"
     )
 
     # Find all figures in Figure Queue
@@ -127,10 +126,10 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
             figure.height = Emu(Inches(13 * ratio))
         figure.left = Emu((Inches(13.3333) - figure.width) / 2)
         figure.top = Emu((Inches(7.5) - figure.height) / 2)
-        copy2(
-            TEMP_INPUT_FOLDER + "Figure Queue/" + file,
-            labMeetingFolderName + "Figures/"
-        )
+        # copy2(
+        #     TEMP_INPUT_FOLDER + "Figure Queue/" + file,
+        #     labMeetingFolderName + "Figures/"
+        # )
         figureCount += 1
 
     # Remove template slides
