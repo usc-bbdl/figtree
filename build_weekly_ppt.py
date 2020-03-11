@@ -37,7 +37,8 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
     mkdir(labMeetingFolderName)
     mkdir(labMeetingFolderName + "Figures/")
     labMeetingPresentationName = labMeetingDate.strftime(
-        "%Y_%m_%d_Lab_Meeting.pptx"
+        labMeetingFolderName
+        + "%Y_%m_%d_Lab_Meeting.pptx"
     )
 
     # Find all figures in Figure Queue

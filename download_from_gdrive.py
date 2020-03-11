@@ -48,7 +48,7 @@ assert len(
 ValeroLabMeetings_folder_id = \
 drive.ListFile({'q': "title='ValeroLabMeetings' and 'root' in parents and trashed=false"}).GetList()[0]['id']
 
-### Find 'ValeroLabMeetings/Meeting Agenda.docx' folder id and save it locally.
+### Find 'ValeroLabMeetings/Weekly Agenda.xlsx' folder id and save it locally.
 ###############################################################################
 assert len(
     drive.ListFile(
