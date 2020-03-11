@@ -52,18 +52,19 @@ drive.ListFile({'q': "title='ValeroLabMeetings' and 'root' in parents and trashe
 ###############################################################################
 assert len(
     drive.ListFile(
-        {'q': "title='Meeting Agenda.docx' and '{}' in parents and trashed=false".format(ValeroLabMeetings_folder_id)}
+        {'q': "title='Weekly Agenda.xlsx' and '{}' in parents and trashed=false".format(ValeroLabMeetings_folder_id)}
     ).GetList()
 ) == 1, \
-    "Error. 'ValeroLabMeetings/Meeting Agenda.docx' not found in Google Drive."
+    "Error. 'ValeroLabMeetings/Weekly Agenda.xlsx' not found in Google Drive."
 
 MeetingAgenda_file = drive.ListFile(
-    {'q': "title='Meeting Agenda.docx' and '{}' in parents and trashed=false".format(ValeroLabMeetings_folder_id)}
+    {'q': "title='Weekly Agenda.xlsx' and '{}' in parents and trashed=false".format(ValeroLabMeetings_folder_id)}
 ).GetList()[0]
 
 MeetingAgenda_file.GetContentFile(
     TEMP_INPUT_FOLDER
-    + MeetingAgenda_file['title']
+    + MeetingAgenda_file['title'],
+    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 )
 
 ### Find 'ValeroLabMeetings/Figure Queue' folder id and save its contents

@@ -1,5 +1,6 @@
 import os.path
 from os import listdir
+from datetime import date
 
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
@@ -42,6 +43,7 @@ def authenticate(gauth):
 
 if tempDict['agendaItemsCount'] == 0 and tempDict['figureCount'] == 0:
     print("No Agenda or Figures this week... :(")
+    # TODO: still send a slack message to Brian
 else:
     ### Connect to Google Drive API
     ###########################################################################
@@ -115,7 +117,9 @@ else:
     #######################################################################
 
     download_link = labMeetingPresentation.metadata['webContentLink']
-    distribute_link_to_lab(download_link)
+    today = date.today()
+    if today.weekday()==0: # Monday
+        distribute_link_to_lab(download_link)
 
     ### Upload figures
     ###########################################################################

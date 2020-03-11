@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from os import mkdir, listdir
 from shutil import copy2
 
-from docx import Document
+import pandas as pd
 from pptx import Presentation
 from pptx.util import Inches, Emu
 
@@ -61,22 +61,42 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
     title_slide_subtitle.text = labMeetingDateStr
 
     # Add Agenda slide
-    agenda_docx = Document(TEMP_INPUT_FOLDER + "Meeting Agenda.docx")
-    if (
-            len(agenda_docx.paragraphs) == 1
-            and agenda_docx.paragraphs[0].text == ''
-    ):
+    agenda_xlsx = pd.read_excel(
+        TEMP_INPUT_FOLDER+"Weekly Agenda.xlsx",
+        sheet_name="Formatted Agenda Items"
+    )
+    agendaItems=list(agenda_xlsx["Agenda Item(s)"])[0]
+    whitelist = {
+        "and", "as", "at", "but", "by", "for", "from", "if", "in", "into",
+        "like", "near", "nor",  "of", "off", "on", "once", "onto", "or",
+        "over", "past", "so", "than", "that", "till", "to", "up", "upon",
+        "with", "when", "yet", "is", "a", "an", "the"
+    }
+    if type(agendaItems)==float:
         agendaItemsCount = 0
-    else:
-        agendaItemsCount = len(agenda_docx.paragraphs)
+    if type(agendaItems)==str:
+        agendaItems = agendaItems.split(";")
+        for i in range(len(agendaItems)):
+            # remove leading/trailing whitespace and capitalize all words
+            temp=agendaItems[i].lstrip().rstrip().lower().split(" ")
+            agendaItems[i]=temp[0].capitalize()
+            for j in range(1,len(temp)):
+                if temp[j] not in whitelist:
+                    agendaItems[i]+= " " + temp[j].capitalize()
+                else:
+                    agendaItems[i]+= " " + temp[j]
+        agendaItemsCount = len(agendaItems)
 
     agenda_slide = prs.slides.add_slide(agenda_slide_layout)
     agenda_slide_title = agenda_slide.placeholders[10]
     agenda_slide_subtitle = agenda_slide.placeholders[11]
     agenda_slide_title.text = "Today's Meeting Agenda"
-    thisWeeksAgenda = ""
-    for p in agenda_docx.paragraphs:
-        thisWeeksAgenda += " - " + p.text + "\n"
+    if agendaItemsCount==0:
+        thisWeeksAgenda = "No Agenda Items Were Added This Week."
+    else:
+        thisWeeksAgenda = ""
+        for item in agendaItems:
+            thisWeeksAgenda += " - " + item + "\n"
     agenda_slide_subtitle.text = thisWeeksAgenda
 
     # Add all appropriate files as Content slides
@@ -130,6 +150,6 @@ agendaItemsCount, figureCount, labMeetingFolderName = build_weekly_ppt(
 )
 
 print("agendaItemsCount\t" + str(agendaItemsCount) + "\n"
-      + "figureCount\t" + str(figureCount) + "\n"
-      + "labMeetingFolderName\t" + labMeetingFolderName
-      )
+    + "figureCount\t" + str(figureCount) + "\n"
+    + "labMeetingFolderName\t" + labMeetingFolderName
+)
