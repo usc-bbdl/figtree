@@ -1,10 +1,9 @@
-import os.path
-from os import listdir
 from datetime import date
 
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
+from gdrive_functions import etl_build_details, authenticate, agenda_and_figures_are_empty
 from slack_functions import *
 
 ### Import relevant values from temp_output.txt
@@ -13,37 +12,53 @@ from slack_functions import *
 assert os.path.exists('temp_output.txt'), "'temp_output.txt' does not exist. Need to run 'build_weekly_ppt.py' before " \
                                           "'upload_to_gdrive.py'. "
 
-def etl_build_details():
-    tempDict = {}
-    with open('temp_output.txt', 'r') as f:
-        for line in f:
-            split_line = line.split()
-            if len(split_line) == 2:
-                tempDict[split_line[0]] = int(split_line[1])
-            else:
-                tempDict[split_line[0]] = " ".join(split_line[1:])
-    return tempDict
-
-
 tempDict = etl_build_details()
 
+## @param folder_name name for the folder without slashes
+## @return labMeetingFolder_id the google drive ID for the new folder
+def gen_folder_for_new_lab_meeting(folder_name):
+    labMeetingFolder_metadata = {
+        'title': folder_name,
+        # Define the file type as folder
+        'mimeType': 'application/vnd.google-apps.folder',
+        # ID of the parent folder
+        'parents': [{
+            "kind": "drive#fileLink",
+            "id": ValeroLabMeetings_folder_id
+        }]
+    }
+    labMeetingFolder = drive.CreateFile(labMeetingFolder_metadata)
+    labMeetingFolder.Upload()
+    labMeetingFolder_id = drive.ListFile(
+        {'q': "title='{}' and '{}' in parents and trashed=false".format(
+            tempDict['labMeetingFolderName'][:-1],
+            ValeroLabMeetings_folder_id
+        )}
+    ).GetList()[0]['id']
+    return labMeetingFolder_id
 
-def authenticate(gauth):
-    if gauth.credentials is None:
-        # Authenticate if they're not there
-        gauth.LocalWebserverAuth()
-    elif gauth.access_token_expired:
-        # Refresh them if expired
-        gauth.Refresh()
+## @param folder_name string target folder name without slashes.
+## @param parent_name string the parent directory. If it's in the root directory, use 'root'.
+## @note have not tested spaces and unescaped inputs
+def compose_folder_find_query(folder_name, parent_name):
+    query_text = "title='%s' and '%s' in parents and trashed=false" % (folder_name,parent_name)
+    return query_text
+
+
+def find_and_id_drive_folder(folder_name,parent_name):
+    query_text = compose_folder_find_query(folder_name, parent_name)
+    results = drive.ListFile({'q': query_text}).GetList()
+    if len(results) == 1:
+        return results[0]['id']
+    elif len(results) > 1:
+        raise NameError('Multiple folders named %s/ found; unclear which one should be chosen' % folder_name)
     else:
-        # Initialize the saved creds
-        gauth.Authorize()
-    return gauth
+        raise NameError('Folder %s/ not found' % folder_name)
 
-
-if tempDict['agendaItemsCount'] == 0 and tempDict['figureCount'] == 0:
+if agenda_and_figures_are_empty():
     print("No Agenda or Figures this week... :(")
     # TODO: still send a slack message to Brian
+
 else:
     ### Connect to Google Drive API
     ###########################################################################
@@ -62,36 +77,15 @@ else:
 
     ### Find 'ValeroLabMeetings' folder id
     ###########################################################################
-    assert len(
-        drive.ListFile({'q': "title='ValeroLabMeetings' and 'root' in parents and trashed=false"}).GetList()
-    ) == 1, \
-        "Error. 'ValeroLabMeetings/' not found in Google Drive."
-
-    ValeroLabMeetings_folder_id = \
-    drive.ListFile({'q': "title='ValeroLabMeetings' and 'root' in parents and trashed=false"}).GetList()[0]['id']
+    meetings_foldername = "ValeroLabMeetings"
+    assert foldername_exists_in_drive(meetings_foldername), \
+        "Error. '%s/' not found in Google Drive."%meetings_foldername
+    ValeroLabMeetings_folder_id = find_and_id_drive_folder(meetings_foldername)
 
     ### Create Folder for Latest Lab Meeting
     ###########################################################################
 
-    labMeetingFolder_metadata = {
-        'title': tempDict['labMeetingFolderName'][:-1],
-        # Define the file type as folder
-        'mimeType': 'application/vnd.google-apps.folder',
-        # ID of the parent folder
-        'parents': [{
-            "kind": "drive#fileLink",
-            "id": ValeroLabMeetings_folder_id
-        }]
-    }
-
-    labMeetingFolder = drive.CreateFile(labMeetingFolder_metadata)
-    labMeetingFolder.Upload()
-    labMeetingFolder_id = drive.ListFile(
-        {'q': "title='{}' and '{}' in parents and trashed=false".format(
-            tempDict['labMeetingFolderName'][:-1],
-            ValeroLabMeetings_folder_id
-        )}
-    ).GetList()[0]['id']
+    gen_folder_for_new_lab_meeting(tempDict['labMeetingFolderName'][:-1])
 
     ### Upload powerpoint presenatation
     ###########################################################################
@@ -118,7 +112,7 @@ else:
 
     download_link = labMeetingPresentation.metadata['webContentLink']
     today = date.today()
-    if today.weekday()==0: # Monday
+    if today.weekday() == 0:  # Monday
         distribute_link_to_lab(download_link)
 
     ### Upload figures
@@ -147,9 +141,7 @@ else:
 
         figuresFolder = drive.CreateFile(figuresFolder_metadata)
         figuresFolder.Upload()
-        figuresFolder_id = drive.ListFile(
-            {'q': "title='Figures' and '{}' in parents and trashed=false".format(labMeetingFolder_id)}
-        ).GetList()[0]['id']
+        figuresFolder_id = figuresFolder.get('id')
 
         ### Move files from Figure Queue to new subfolder
         #######################################################################
