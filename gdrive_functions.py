@@ -1,4 +1,9 @@
-from upload_to_gdrive import tempDict
+import os
+
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+
+from upload_to_gdrive import ValeroLabMeetings_folder_id, drive, tempDict
 
 
 def etl_build_details():
@@ -26,5 +31,89 @@ def authenticate(gauth):
     return gauth
 
 
-def agenda_and_figures_are_empty():
+def agenda_and_figures_are_empty(tempDict):
     return tempDict['agendaItemsCount'] == 0 and tempDict['figureCount'] == 0
+
+
+def gen_folder_for_new_lab_meeting(folder_name):
+    labMeetingFolder_metadata = {
+        'title': folder_name,
+        # Define the file type as folder
+        'mimeType': 'application/vnd.google-apps.folder',
+        # ID of the parent folder
+        'parents': [{
+            "kind": "drive#fileLink",
+            "id": ValeroLabMeetings_folder_id
+        }]
+    }
+    labMeetingFolder = drive.CreateFile(labMeetingFolder_metadata)
+    labMeetingFolder.Upload()
+    labMeetingFolder_id = drive.ListFile(
+        {'q': "title='{}' and '{}' in parents and trashed=false".format(
+            tempDict['labMeetingFolderName'][:-1],
+            ValeroLabMeetings_folder_id
+        )}
+    ).GetList()[0]['id']
+    return labMeetingFolder_id
+
+
+def compose_folder_find_query(folder_name, parent_name):
+    query_text = "title='%s' and '%s' in parents and trashed=false" % (folder_name,parent_name)
+    return query_text
+
+
+def find_and_id_drive_folder(folder_name,parent_name):
+    query_text = compose_folder_find_query(folder_name, parent_name)
+    results = drive.ListFile({'q': query_text}).GetList()
+    if len(results) == 1:
+        return results[0]['id']
+    elif len(results) > 1:
+        raise NameError('Multiple folders named %s/ found; unclear which one should be chosen' % folder_name)
+    else:
+        raise NameError('Folder %s/ not found' % folder_name)
+
+
+def compose_mkdir_query():
+    return {
+        'title': foldername,
+        # Define the file type as folder
+        'mimeType': 'application/vnd.google-apps.folder',
+        # ID of the parent folder
+        'parents': [{
+            "kind": "drive#fileLink",
+            "id": parent_id
+        }]
+    }
+
+
+def drive_mkdir(dirname, parentid):
+    newFolder = drive.CreateFile(compose_mkdir_query(dirname, parentid))
+    newFolder.Upload() #sync new change to drive
+    return newFolder.get('id')
+
+
+def authenticate_drive():
+    gauth = GoogleAuth()
+    # Try to load saved client credentials
+    if os.path.exists("mycreds.txt"):
+        gauth.LoadCredentialsFile("mycreds.txt")
+    gauth = authenticate(gauth)
+    # Save the current credentials to a file
+    gauth.SaveCredentialsFile("mycreds.txt")
+    return GoogleDrive(gauth)
+
+
+def drive_newfile(filepath, folder_id):
+    file = drive.CreateFile(
+        {
+            "parents": [{
+                "kind": "drive#fileLink",
+                "id": folder_id
+            }]
+        }
+    )
+    file.SetContentFile(
+        filepath
+    )
+    file.Upload()
+    return file
