@@ -55,6 +55,26 @@ def find_and_id_drive_folder(folder_name,parent_name):
     else:
         raise NameError('Folder %s/ not found' % folder_name)
 
+
+def compose_mkdir_query():
+    return {
+        'title': foldername,
+        # Define the file type as folder
+        'mimeType': 'application/vnd.google-apps.folder',
+        # ID of the parent folder
+        'parents': [{
+            "kind": "drive#fileLink",
+            "id": parent_id
+        }]
+    }
+
+## @param dirname name of directory. try to avoid spaces and weird symbols
+## @param parent_id drive-id that will house the new folder.
+def drive_mkdir(dirname, parentid):
+    newFolder = drive.CreateFile(compose_mkdir_query(dirname, parent_id))
+    newFolder.Upload() #sync new change to drive
+    return newFolder.get('id')
+
 if agenda_and_figures_are_empty():
     print("No Agenda or Figures this week... :(")
     # TODO: still send a slack message to Brian
@@ -128,20 +148,12 @@ else:
     if len(FigureQueue_item_list) != 0:
         ### Create new figures subfolder
         #######################################################################
-        figuresFolder_metadata = {
-            'title': 'Figures',
-            # Define the file type as folder
-            'mimeType': 'application/vnd.google-apps.folder',
-            # ID of the parent folder
-            'parents': [{
-                "kind": "drive#fileLink",
-                "id": labMeetingFolder_id
-            }]
-        }
 
-        figuresFolder = drive.CreateFile(figuresFolder_metadata)
-        figuresFolder.Upload()
-        figuresFolder_id = figuresFolder.get('id')
+
+
+
+        figuresFolder_id = drive_mkdir('Figures', labMeetingFolder_id)
+
 
         ### Move files from Figure Queue to new subfolder
         #######################################################################

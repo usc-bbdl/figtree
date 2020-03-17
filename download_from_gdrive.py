@@ -4,20 +4,9 @@ from os import mkdir
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
-def authenticate(gauth):
-    if gauth.credentials is None:
-        # Authenticate if they're not there
-        gauth.LocalWebserverAuth()
-    elif gauth.access_token_expired:
-        # Refresh them if expired
-        gauth.Refresh()
-    else:
-        # Initialize the saved creds
-        gauth.Authorize()
-    return gauth
-
 ### Connect to Google Drive API
 ###############################################################################
+from gdrive_functions import authenticate
 
 gauth = GoogleAuth()
 

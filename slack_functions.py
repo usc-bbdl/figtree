@@ -24,5 +24,6 @@ def distribute_link_to_lab(link_string):
     response = requests.post(SLACK_API, headers=headers, data=data)
     print("WebHook Successful: " + str(slack_confirmed_receipt(response)))
 
+## @return int week_no the week number where monday is 0, tues 1, wed 2, thu 3, fri 4, sat 5, sun 6
 def week_number():
     return datetime.datetime.now().isocalendar()[1]
