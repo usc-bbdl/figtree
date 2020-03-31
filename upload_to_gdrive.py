@@ -118,7 +118,7 @@ else:
 
     download_link = labMeetingPresentation.metadata['webContentLink']
     today = date.today()
-    if today.weekday()==0: # Monday
+    if today.weekday()==1: # Tuesday UTC
         distribute_link_to_lab(download_link)
 
     ### Upload figures
