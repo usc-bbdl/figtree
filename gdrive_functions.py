@@ -34,8 +34,9 @@ def authenticate(gauth):
 def agenda_and_figures_are_empty(tempDict):
     return tempDict['agendaItemsCount'] == 0 and tempDict['figureCount'] == 0
 
-
-def gen_folder_for_new_lab_meeting(folder_name):
+## @param folder_name name for the folder without slashes
+## @return labMeetingFolder_id the google drive ID for the new folder
+def mkdir_for_new_lab_meeting(folder_name):
     labMeetingFolder_metadata = {
         'title': folder_name,
         # Define the file type as folder
@@ -56,7 +57,9 @@ def gen_folder_for_new_lab_meeting(folder_name):
     ).GetList()[0]['id']
     return labMeetingFolder_id
 
-
+## @param folder_name string target folder name without slashes.
+## @param parent_name string the parent directory. If it's in the root directory, use 'root'.
+## @note have not tested spaces and unescaped inputs
 def compose_folder_find_query(folder_name, parent_name):
     query_text = "title='%s' and '%s' in parents and trashed=false" % (folder_name,parent_name)
     return query_text
@@ -85,7 +88,8 @@ def compose_mkdir_query():
         }]
     }
 
-
+## @param dirname name of directory. try to avoid spaces and weird symbols
+## @param parent_id drive-id that will house the new folder.
 def drive_mkdir(dirname, parentid):
     newFolder = drive.CreateFile(compose_mkdir_query(dirname, parentid))
     newFolder.Upload() #sync new change to drive
@@ -102,7 +106,9 @@ def authenticate_drive():
     gauth.SaveCredentialsFile("mycreds.txt")
     return GoogleDrive(gauth)
 
-
+## @param filepath string, a single file to upload.
+## @param folder_id string folder target drive id
+## @return drive_file a drive-file with an ID and weblink
 def drive_newfile(filepath, folder_id):
     file = drive.CreateFile(
         {
