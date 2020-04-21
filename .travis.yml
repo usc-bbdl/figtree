@@ -8,7 +8,10 @@ install:
 # command to run tests
 script:
   - echo $CREDENTIALS >> mycreds.txt
+  - pip freeze
   - python --version
+  - pip install git+https://github.com/gsuitedevs/PyDrive.git#egg=PyDrive
+  - pip freeze
   - python download_from_gdrive.py
   - python build_weekly_ppt.py >> temp_output.txt
   - python upload_to_gdrive.py
