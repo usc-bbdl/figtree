@@ -26,7 +26,8 @@ def etl_build_details():
 
 
 tempDict = etl_build_details()
-
+#to see outputs
+print(tempDict)
 
 def authenticate(gauth):
     if gauth.credentials is None:
