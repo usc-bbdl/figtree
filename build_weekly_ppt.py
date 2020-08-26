@@ -5,7 +5,8 @@ from shutil import copy2
 
 import xlrd
 from pptx import Presentation
-from pptx.util import Inches, Emu
+from pptx.util import Inches, Emu, Pt
+from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
 
 ### Assumes files will be downloaded to a folder name TEMP_INPUT_FOLDER
 TEMP_INPUT_FOLDER = 'TEMP_INPUT_FOLDER/'
@@ -115,20 +116,36 @@ def build_weekly_ppt(TEMP_INPUT_FOLDER):
             presenterName = titleStr[(titleStr.rfind(" ") + 1):]
             titleStr = titleStr[:titleStr.rfind(" ")]
         content_slide_title.text = titleStr + " (" + presenterName + ")"
-        figure = content_slide.shapes.add_picture(
-            TEMP_INPUT_FOLDER + "Figure Queue/" + file,
-            Inches(0.5),
-            Inches(1.75)
-        )
-        ratio = figure.height / figure.width
-        if ratio > 5 / 13:
-            figure.height = Emu(Inches(5))
-            figure.width = Emu(Inches(5 / ratio))
+        if file[-3:].capitalize()!="Png":
+            left = Inches(1)
+            top = Inches(1.5)
+            width = Inches(11.3333)
+            height = Inches(4.5)
+            poorImgTextBox = content_slide.shapes.add_textbox(left, top, width, height)
+            poorImgTextFrame = poorImgTextBox.text_frame
+            poorImgTextFrame.text = "Wrong file type. Must be PNG!"
+            poorImgTextFrame.margin_bottom = Inches(0.08)
+            poorImgTextFrame.margin_left = 0
+            poorImgTextFrame.vertical_anchor = MSO_ANCHOR.MIDDLE
+            poorImgTextFrame.paragraphs[0].alignment = PP_ALIGN.CENTER
+            poorImgTextFrame.paragraphs[0].font.size = Pt(40)
+            poorImgTextFrame.word_wrap = False
+            poorImgTextFrame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
         else:
-            figure.width = Emu(Inches(13))
-            figure.height = Emu(Inches(13 * ratio))
-        figure.left = Emu((Inches(13.3333) - figure.width) / 2)
-        figure.top = Emu((Inches(7.5) - figure.height) / 2)
+            figure = content_slide.shapes.add_picture(
+                TEMP_INPUT_FOLDER + "Figure Queue/" + file,
+                Inches(0.5),
+                Inches(1.75)
+            )
+            ratio = figure.height / figure.width
+            if ratio > 5 / 13:
+                figure.height = Emu(Inches(5))
+                figure.width = Emu(Inches(5 / ratio))
+            else:
+                figure.width = Emu(Inches(13))
+                figure.height = Emu(Inches(13 * ratio))
+            figure.left = Emu((Inches(13.3333) - figure.width) / 2)
+            figure.top = Emu((Inches(7.5) - figure.height) / 2)
         # copy2(
         #     TEMP_INPUT_FOLDER + "Figure Queue/" + file,
         #     labMeetingFolderName + "Figures/"
