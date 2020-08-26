@@ -1,7 +1,7 @@
 import os.path
 from os import listdir
+from googleapiclient import discovery
 from datetime import date
-
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
@@ -26,7 +26,8 @@ def etl_build_details():
 
 
 tempDict = etl_build_details()
-
+#to see outputs
+print(tempDict)
 
 def authenticate(gauth):
     if gauth.credentials is None:
